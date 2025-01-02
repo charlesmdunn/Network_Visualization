@@ -2,33 +2,37 @@ d3.json("network.json").then(function(data) {
   console.log("Nodes:", data.nodes);
   console.log("Edges:", data.edges);
 
-  // Create a set of valid node IDs
+  // Create a Set of valid node IDs for quick lookup
   const nodeIds = new Set(data.nodes.map(node => node.id));
 
   // Filter edges to ensure 'from' and 'to' fields are valid
   const validEdges = data.edges.filter(edge => {
     if (!nodeIds.has(edge.from)) {
-      console.error(`Edge has invalid 'from' node: ${edge.from}`);
+      console.error(`Invalid 'from' node: ${edge.from} (not in nodes)`);
       return false;
     }
     if (!nodeIds.has(edge.to)) {
-      console.error(`Edge has invalid 'to' node: ${edge.to}`);
+      console.error(`Invalid 'to' node: ${edge.to} (not in nodes)`);
       return false;
     }
     return true;
   });
 
+  if (validEdges.length !== data.edges.length) {
+    console.warn("Some edges were removed due to invalid node references.");
+  }
+
   // Set up the width and height for the graph
   const width = window.innerWidth;
   const height = window.innerHeight;
 
-  // Create SVG container for D3.js
+  // Create an SVG container for D3.js
   const svg = d3.select("#graph")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
 
-  // Set up the force simulation for nodes and links
+  // Create the force simulation
   const simulation = d3.forceSimulation(data.nodes)
     .force("link", d3.forceLink(validEdges).id(d => d.id).distance(100))
     .force("charge", d3.forceManyBody().strength(-200))
@@ -56,7 +60,7 @@ d3.json("network.json").then(function(data) {
       .on("drag", dragged)
       .on("end", dragEnded));
 
-  // Create labels for the nodes
+  // Add labels to nodes
   const label = svg.append("g")
     .selectAll(".label")
     .data(data.nodes)
@@ -66,7 +70,7 @@ d3.json("network.json").then(function(data) {
     .attr("y", 4)
     .text(d => d.label);
 
-  // Update positions of nodes and links on each tick
+  // Update node and link positions on each tick of the simulation
   simulation.on("tick", function() {
     link
       .attr("x1", d => d.source.x)
@@ -100,4 +104,5 @@ d3.json("network.json").then(function(data) {
     d.fx = null;
     d.fy = null;
   }
+
 });
