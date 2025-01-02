@@ -1,0 +1,26 @@
+body {
+    margin: 0;
+    overflow: hidden;
+  }
+  
+  #graph {
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .node {
+    fill: #1f77b4;
+    stroke: white;
+    stroke-width: 1.5px;
+  }
+  
+  .link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+  }
+  
+  .label {
+    font-size: 12px;
+    font-family: sans-serif;
+  }
+  
