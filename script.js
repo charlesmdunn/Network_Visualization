@@ -1,29 +1,29 @@
 d3.json("network.json").then(function(data) {
-  console.log("Nodes:", data.nodes);
-  console.log("Edges:", data.edges);
+  console.log("Loaded data:", data);
+
+  if (!data || !data.nodes || !data.edges) {
+    console.error("Error: Invalid data structure. Please ensure the JSON contains 'nodes' and 'edges' arrays.");
+    return;
+  }
 
   // Create a Set of valid node IDs for quick lookup
   const nodeIds = new Set(data.nodes.map(node => node.id));
-
-  // Log the node IDs
   console.log("Valid node IDs:", Array.from(nodeIds));
 
-  // Filter edges to ensure 'from' and 'to' fields are valid
+  // Filter edges to ensure 'from' and 'to' fields are valid node IDs
   const validEdges = data.edges.filter(edge => {
     if (!nodeIds.has(edge.from)) {
-      console.error(`Invalid 'from' node: ${edge.from} (not in nodes)`);
+      console.error(`Invalid 'from' node: ${edge.from} (not found in nodes)`);
       return false;
     }
     if (!nodeIds.has(edge.to)) {
-      console.error(`Invalid 'to' node: ${edge.to} (not in nodes)`);
+      console.error(`Invalid 'to' node: ${edge.to} (not found in nodes)`);
       return false;
     }
     return true;
   });
 
-  // Log the valid edges
   console.log("Valid edges:", validEdges);
-
   if (validEdges.length !== data.edges.length) {
     console.warn("Some edges were removed due to invalid node references.");
   }
@@ -40,7 +40,7 @@ d3.json("network.json").then(function(data) {
 
   // Create the force simulation
   const simulation = d3.forceSimulation(data.nodes)
-    .force("link", d3.forceLink(validEdges).id(d => d.id).distance(100))
+    .force("link", d3.forceLink(validEdges).id(function(d) { return d.id; }).distance(100))  // Correctly reference the 'id' field
     .force("charge", d3.forceManyBody().strength(-200))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
