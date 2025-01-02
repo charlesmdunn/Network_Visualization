@@ -6,28 +6,6 @@ d3.json("network.json").then(function(data) {
     return;
   }
 
-  // Create a Set of valid node IDs for quick lookup
-  const nodeIds = new Set(data.nodes.map(node => node.id));
-  console.log("Valid node IDs:", Array.from(nodeIds));
-
-  // Filter edges to ensure 'from' and 'to' fields are valid node IDs
-  const validEdges = data.edges.filter(edge => {
-    if (!nodeIds.has(edge.from)) {
-      console.error(`Invalid 'from' node: ${edge.from} (not found in nodes)`);
-      return false;
-    }
-    if (!nodeIds.has(edge.to)) {
-      console.error(`Invalid 'to' node: ${edge.to} (not found in nodes)`);
-      return false;
-    }
-    return true;
-  });
-
-  console.log("Valid edges:", validEdges);
-  if (validEdges.length !== data.edges.length) {
-    console.warn("Some edges were removed due to invalid node references.");
-  }
-
   // Set up the width and height for the graph
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -38,29 +16,25 @@ d3.json("network.json").then(function(data) {
     .attr("width", width)
     .attr("height", height);
 
-  // Create the force simulation
-  const simulation = d3.forceSimulation(data.nodes)
-    .force("link", d3.forceLink(validEdges).id(function(d) { return d.id; }).distance(100))  // Correctly reference the 'id' field
-    .force("charge", d3.forceManyBody().strength(-200))
-    .force("center", d3.forceCenter(width / 2, height / 2));
-
-  // Create links (edges)
+  // Create links (edges) first
   const link = svg.append("g")
     .selectAll(".link")
-    .data(validEdges)
+    .data(data.edges)
     .enter().append("line")
     .attr("class", "link")
     .attr("stroke", "#aaa")
     .attr("stroke-width", 2);
 
-  // Create nodes
+  // Create nodes with static positions (for debugging)
   const node = svg.append("g")
     .selectAll(".node")
     .data(data.nodes)
     .enter().append("circle")
     .attr("class", "node")
-    .attr("r", 10)
+    .attr("r", 20)  // Increase radius for visibility
     .attr("fill", "#69b3a2")
+    .attr("stroke", "#333")
+    .attr("stroke-width", 2)  // Add stroke for better visibility
     .call(d3.drag()
       .on("start", dragStarted)
       .on("drag", dragged)
@@ -76,7 +50,13 @@ d3.json("network.json").then(function(data) {
     .attr("y", 4)
     .text(d => d.label);
 
-  // Update node and link positions on each tick of the simulation
+  // Create the force simulation and link it with nodes
+  const simulation = d3.forceSimulation(data.nodes)
+    .force("link", d3.forceLink(data.edges).id(function(d) { return d.id; }).distance(100))
+    .force("charge", d3.forceManyBody().strength(-200))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+  // Update positions after simulation
   simulation.on("tick", function() {
     link
       .attr("x1", d => d.source.x)
@@ -110,5 +90,4 @@ d3.json("network.json").then(function(data) {
     d.fx = null;
     d.fy = null;
   }
-
 });
