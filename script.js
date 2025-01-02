@@ -16,7 +16,7 @@ d3.json("network.json").then(function(data) {
     .attr("width", width)
     .attr("height", height);
 
-  // Create links (edges) first
+  // Create links (edges)
   const link = svg.append("g")
     .selectAll(".link")
     .data(data.edges)
@@ -25,7 +25,7 @@ d3.json("network.json").then(function(data) {
     .attr("stroke", "#aaa")
     .attr("stroke-width", 2);
 
-  // Create nodes with static positions (for debugging)
+  // Create nodes with static positions for now
   const node = svg.append("g")
     .selectAll(".node")
     .data(data.nodes)
@@ -50,7 +50,7 @@ d3.json("network.json").then(function(data) {
     .attr("y", 4)
     .text(d => d.label);
 
-  // Create the force simulation and link it with nodes
+  // Create the force simulation
   const simulation = d3.forceSimulation(data.nodes)
     .force("link", d3.forceLink(data.edges).id(function(d) { return d.id; }).distance(100))
     .force("charge", d3.forceManyBody().strength(-200))
@@ -73,7 +73,7 @@ d3.json("network.json").then(function(data) {
       .attr("y", d => d.y);
   });
 
-  // Functions for dragging nodes
+  // Dragging functions for nodes
   function dragStarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     d.fx = d.x;
