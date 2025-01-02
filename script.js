@@ -49,4 +49,47 @@ d3.json("network.json").then(function(data) {
   // Create the force simulation
   const simulation = d3.forceSimulation(data.nodes)
     .force("link", d3.forceLink(data.edges).id(function(d) { return d.id; }).distance(100))
-    .force("charge", d3.forceManyBody().strength(-2
+    .force("charge", d3.forceManyBody().strength(-200))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+  // Now we can define the drag functions using the simulation
+  node.call(d3.drag()
+    .on("start", dragStarted)
+    .on("drag", dragged)
+    .on("end", dragEnded));
+
+  // Function for dragging nodes
+  function dragStarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  function dragEnded(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  // Update positions after simulation
+  simulation.on("tick", function() {
+    link
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+
+    node
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y);
+
+    label
+      .attr("x", d => d.x)
+      .attr("y", d => d.y);
+  });
+});
