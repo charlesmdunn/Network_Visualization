@@ -5,6 +5,9 @@ d3.json("network.json").then(function(data) {
   // Create a Set of valid node IDs for quick lookup
   const nodeIds = new Set(data.nodes.map(node => node.id));
 
+  // Log the node IDs
+  console.log("Valid node IDs:", Array.from(nodeIds));
+
   // Filter edges to ensure 'from' and 'to' fields are valid
   const validEdges = data.edges.filter(edge => {
     if (!nodeIds.has(edge.from)) {
@@ -17,6 +20,9 @@ d3.json("network.json").then(function(data) {
     }
     return true;
   });
+
+  // Log the valid edges
+  console.log("Valid edges:", validEdges);
 
   if (validEdges.length !== data.edges.length) {
     console.warn("Some edges were removed due to invalid node references.");
