@@ -1,13 +1,12 @@
 {
-    "nodes": [
-      { "id": "1", "label": "Alice" },
-      { "id": "2", "label": "Bob" },
-      { "id": "3", "label": "Charlie" }
-    ],
-    "edges": [
-      { "from": "1", "to": "2", "relationship": "friend" },
-      { "from": "2", "to": "3", "relationship": "coworker" },
-      { "from": "1", "to": "3", "relationship": "acquaintance" }
-    ]
-  }
-  
+  "nodes": [
+    { "id": "1", "label": "Alice" },
+    { "id": "2", "label": "Bob" },
+    { "id": "3", "label": "Charlie" }
+  ],
+  "edges": [
+    { "from": "1", "to": "2" },
+    { "from": "2", "to": "3" },
+    { "from": "1", "to": "3" }
+  ]
+}
