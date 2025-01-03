@@ -148,15 +148,22 @@
       });
 
       document.getElementById("save").addEventListener("click", () => {
-        const updatedData = {
-          elements: cy.json().elements
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(updatedData, null, 2));
-        const dlAnchorElem = document.createElement("a");
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "data.json");
-        dlAnchorElem.click();
-      });
+  const updatedData = {
+    elements: cy.json().elements
+  };
+  const jsonText = JSON.stringify(updatedData, null, 2);
+
+  // Generate a timestamp
+  const timestamp = new Date().toISOString().replace(/[:-]/g, '').replace('T', '_').split('.')[0];
+  const filename = `data_${timestamp}.json`;
+
+  // Create a downloadable link
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonText);
+  const dlAnchorElem = document.createElement("a");
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", filename); // Use the timestamped filename
+  dlAnchorElem.click();
+});
     });
   </script>
 </body>
