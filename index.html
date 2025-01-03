@@ -3,23 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Network Visualization</title>
-  
-  <!-- Link to the favicon (optional) -->
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-
-  <!-- D3.js -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-
-  <!-- External stylesheet -->
-  <link rel="stylesheet" href="style.css">
-
+  <title>Graph Editor</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #cy {
+      width: 100%;
+      height: 90vh;
+      border: 1px solid #ccc;
+    }
+    #controls {
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    #controls select, #controls button, #controls input {
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Network Visualization</h1>
-  <div id="graph"></div>
+  <div id="cy"></div>
+  <div id="controls">
+    <label for="edgeClass">Edge Class:</label>
+    <select id="edgeClass">
+      <option value="class1">Class 1</option>
+      <option value="class2">Class 2</option>
+      <option value="class3">Class 3</option>
+    </select>
+    <button id="addEdge">Add Edge</button>
+    <button id="deleteEdge">Delete Edge</button>
+    <button id="save">Save JSON</button>
+    <label for="confidenceSlider">Confidence Filter:</label>
+    <input type="range" id="confidenceSlider" min="0" max="1" step="0.01" value="0">
+    <span id="confidenceValue">0.00</span>
+  </div>
 
-  <!-- External JavaScript -->
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const graphData = {
+        elements: {
+          nodes: [
+            { data: { id: "a", label: "Node A", confidence: 0.9 }, position: { x: 100, y: 100 } },
+            { data: { id: "b", label: "Node B", confidence: 0.5 }, position: { x: 200, y: 200 } },
+            { data: { id: "c", label: "Node C", confidence: 0.3 }, position: { x: 300, y: 100 } }
+          ],
+          edges: [
+            { data: { source: "a", target: "b", class: "class1" } }
+          ]
+        }
+      };
+
+      const cy = cytoscape({
+        container: document.getElementById("cy"),
+        elements: graphData.elements,
+        style: [
+          {
+            selector: "node",
+            style: {
+              "background-color": "#0074D9",
+              label: "data(label)"
+            }
+          },
+          {
+            selector: "edge",
+            style: {
+              "width": 3,
+              "line-color": "#FF4136",
+              "target-arrow-color": "#FF4136",
+              "target-arrow-shape": "triangle",
+              label: "data(class)"
+            }
+          }
+        ],
+        layout: { name: "preset" }
+      });
+
+      const slider = document.getElementById("confidenceSlider");
+      const confidenceValue = document.getElementById("confidenceValue");
+
+      slider.addEventListener("input", () => {
+        const threshold = parseFloat(slider.value);
+        confidenceValue.textContent = threshold.toFixed(2);
+
+        cy.batch(() => {
+          cy.nodes().forEach((node) => {
+            const confidence = node.data("confidence");
+            if (confidence >= threshold) {
+              node.show();
+            } else {
+              node.hide();
+            }
+          });
+        });
+      });
+
+      let selectedNodes = [];
+      cy.on("tap", "node", (evt) => {
+        const node = evt.target;
+        if (!selectedNodes.includes(node.id())) {
+          selectedNodes.push(node.id());
+        }
+        if (selectedNodes.length > 2) {
+          selectedNodes.shift();
+        }
+      });
+
+      document.getElementById("addEdge").addEventListener("click", () => {
+        if (selectedNodes.length === 2) {
+          const edgeClass = document.getElementById("edgeClass").value;
+          cy.add({
+            group: "edges",
+            data: {
+              source: selectedNodes[0],
+              target: selectedNodes[1],
+              class: edgeClass
+            }
+          });
+          selectedNodes = [];
+        } else {
+          alert("Select two nodes to add an edge.");
+        }
+      });
+
+      document.getElementById("deleteEdge").addEventListener("click", () => {
+        const selectedEdge = cy.edges(":selected");
+        if (selectedEdge.length) {
+          selectedEdge.remove();
+        } else {
+          alert("Select an edge to delete.");
+        }
+      });
+
+      document.getElementById("save").addEventListener("click", () => {
+        const updatedData = {
+          elements: cy.json().elements
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(updatedData, null, 2));
+        const dlAnchorElem = document.createElement("a");
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "data.json");
+        dlAnchorElem.click();
+      });
+    });
+  </script>
 </body>
 </html>
