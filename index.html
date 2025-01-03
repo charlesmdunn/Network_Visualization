@@ -17,9 +17,18 @@
       border: 1px solid #ccc;
     }
     #controls {
-      padding: 10px;
-      background: #f9f9f9;
-    }
+  padding: 10px;
+  background: #f9f9f9;
+  position: fixed; /* Keep controls visible on smaller screens */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap; /* Adjust for small screens */
+  justify-content: space-evenly;
+  z-index: 10; /* Ensure it appears above the canvas */
+}
+
     #controls select, #controls button, #controls input {
       margin: 5px;
     }
