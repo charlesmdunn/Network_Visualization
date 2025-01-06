@@ -18,9 +18,18 @@
       border: 1px solid #ccc;
     }
     #controls {
-      padding: 10px;
-      background: #f9f9f9;
-    }
+  padding: 10px;
+  background: #f9f9f9;
+  position: fixed; /* Keep controls visible on smaller screens */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap; /* Adjust for small screens */
+  justify-content: space-evenly;
+  z-index: 10; /* Ensure it appears above the canvas */
+}
+
     #controls select, #controls button, #controls input {
       margin: 5px;
     }
@@ -142,15 +151,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       document.getElementById("save").addEventListener("click", () => {
-        const updatedData = {
-          elements: cy.json().elements
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(updatedData, null, 2));
-        const dlAnchorElem = document.createElement("a");
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "data.json");
-        dlAnchorElem.click();
-      });
+  const updatedData = {
+    elements: cy.json().elements
+  };
+  const jsonText = JSON.stringify(updatedData, null, 2);
+
+  // Generate a timestamp
+  const timestamp = new Date().toISOString().replace(/[:-]/g, '').replace('T', '_').split('.')[0];
+  const filename = `data_${timestamp}.json`;
+
+  // Create a downloadable link
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonText);
+  const dlAnchorElem = document.createElement("a");
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", filename); // Use the timestamped filename
+  dlAnchorElem.click();
+});
     });
   </script>
 </body>
