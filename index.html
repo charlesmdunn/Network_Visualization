@@ -17,9 +17,18 @@
       border: 1px solid #ccc;
     }
     #controls {
-      padding: 10px;
-      background: #f9f9f9;
-    }
+  padding: 10px;
+  background: #f9f9f9;
+  position: fixed; /* Keep controls visible on smaller screens */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap; /* Adjust for small screens */
+  justify-content: space-evenly;
+  z-index: 10; /* Ensure it appears above the canvas */
+}
+
     #controls select, #controls button, #controls input {
       margin: 5px;
     }
@@ -43,23 +52,22 @@
   </div>
 
   <script>
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const graphData = {
         elements: {
           nodes: [
 { data: { id: "010", label: "Use local Vault inside working copy app", confidence: 0.9
 }, position:{"x":105.33187134502923,"y":107.61695906432749}}, { data: { id: "011", label: "Use shortcut to generate initial json from note", confidence: 0.5
-}, position:{x:67,y:271}}, { data: { id: "012", label: "Use blank template for initialization", confidence: 0.9
-}, position:{x:206,y:101}}, { data: { id: "015", label: "automate push after initial json", confidence: 0.5
+}, position:{x:13,y:41}}, { data: { id: "012", label: "Use blank template for initialization", confidence: 0.9
+}, position:{x:38,y:200}}, { data: { id: "015", label: "automate push after initial json", confidence: 0.5
 }, position:{"x":230.46783625730995,"y":253.31871345029239}}, { data: { id: "018", label: "Use Action button to access list of github pages", confidence: 0.9
-}, position:{x:160,y:350}}, { data: { id: "020", label: "Shortcut to update index based on most recent appreciate download and push repo", confidence: 0.9
+}, position:{x:336,y:341}}, { data: { id: "020", label: "Shortcut to update index based on most recent appreciate download and push repo", confidence: 0.9
 }, position:{"x":300,"y":100}}, { data: { id: "021", label: "I dont know if I want the update shortcut to live in shared page or action button menu", confidence: 0.9
-}, position:{x:346,y:462}} ],
+}, position:{x:185,y:89}} ],
          edges: [{locked:false,position:{x:0,y:0},grabbable:true,data:{id:"4eb5c69f-5640-4c44-b0fd-16a95a04df14",source:"010",class:"class1",target:"015"},removed:false,selectable:true,selected:false,pannable:true,classes:"",group:"edges"}, {locked:false,position:{x:0,y:0},grabbable:true,data:{id:"ec816f9a-6897-4278-b162-26ec61fcdde7",source:"020",class:"class1",target:"018"},removed:false,selectable:true,selected:false,pannable:true,classes:"",group:"edges"}, {locked:false,position:{x:0,y:0},grabbable:true,data:{id:"8aa415e9-fae3-4eed-bb48-b7ea7d45c512",source:"010",class:"class3",target:"020"},removed:false,selectable:true,selected:false,pannable:true,classes:"",group:"edges"}]
         }
       };
       
-     
       const cy = cytoscape({
         container: document.getElementById("cy"),
         elements: graphData.elements,
@@ -142,15 +150,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       document.getElementById("save").addEventListener("click", () => {
-        const updatedData = {
-          elements: cy.json().elements
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(updatedData, null, 2));
-        const dlAnchorElem = document.createElement("a");
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "data.json");
-        dlAnchorElem.click();
-      });
+  const updatedData = {
+    elements: cy.json().elements
+  };
+  const jsonText = JSON.stringify(updatedData, null, 2);
+
+  // Generate a timestamp
+  const timestamp = new Date().toISOString().replace(/[:-]/g, '').replace('T', '_').split('.')[0];
+  const filename = `data_${timestamp}.json`;
+
+  // Create a downloadable link
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonText);
+  const dlAnchorElem = document.createElement("a");
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", filename); // Use the timestamped filename
+  dlAnchorElem.click();
+});
     });
   </script>
 </body>
